@@ -1,8 +1,5 @@
-import {
-  usePokemonSource,
-  usePokemon,
-  PokemonContext,
-} from './stores/nativeStore';
+import { usePokemon } from './stores/reactQueryStore';
+import PokemonProvider from './stores/reactQueryStore';
 
 import { Input } from './components/ui/input';
 import {
@@ -11,6 +8,7 @@ import {
   CardFooter,
   CardHeader,
 } from './components/ui/card';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 function SearchBox() {
   const { search, setSearch } = usePokemon()!;
@@ -18,6 +16,7 @@ function SearchBox() {
     <Input
       type="text"
       className="text-lg"
+      placeholder="Search..."
       value={search}
       onChange={(e) => setSearch(e.target.value)}
     />
@@ -48,20 +47,23 @@ function PokemonList() {
     </div>
   );
 }
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <PokemonContext.Provider value={usePokemonSource()}>
-      <main className="w-m container mx-auto max-w-3xl py-12">
-        <h1 className="my-6 text-center text-4xl font-extrabold capitalize">
-          state management libraries
-        </h1>
-        <div className="w-full space-y-6">
-          <SearchBox />
-          <PokemonList />
-        </div>
-      </main>
-    </PokemonContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <PokemonProvider>
+        <main className="w-m container mx-auto max-w-3xl py-12">
+          <h1 className="my-6 text-center text-4xl font-extrabold capitalize">
+            state management libraries
+          </h1>
+          <div className="w-full space-y-6">
+            <SearchBox />
+            <PokemonList />
+          </div>
+        </main>
+      </PokemonProvider>
+    </QueryClientProvider>
   );
 }
 

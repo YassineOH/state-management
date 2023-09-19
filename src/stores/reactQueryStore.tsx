@@ -1,5 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
 import {
-  useEffect,
   createContext,
   useContext,
   useReducer,
@@ -21,40 +21,30 @@ export type PokemonType = {
 };
 
 type State = {
-  pokemon: PokemonType[];
   search: string;
 };
-type PokemonAction =
-  | {
-      type: 'SET_POKEMON';
-      payload: PokemonType[];
-    }
-  | {
-      type: 'SET_SEARCH';
-      payload: string;
-    };
+type PokemonAction = {
+  type: 'SET_SEARCH';
+  payload: string;
+};
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const usePokemonSource = () => {
-  const [{ pokemon, search }, dispatch] = useReducer(
+  const [{ search }, dispatch] = useReducer(
     (state: State, action: PokemonAction) => {
-      if (action.type == 'SET_POKEMON') {
-        return { ...state, pokemon: action.payload };
-      } else if (action.type === 'SET_SEARCH') {
+      if (action.type === 'SET_SEARCH') {
         return { ...state, search: action.payload };
       }
       return state;
     },
     {
-      pokemon: [],
       search: '',
     },
   );
-  useEffect(() => {
-    fetch('./pokemon.json')
-      .then((res) => res.json())
-      .then((data) => dispatch({ type: 'SET_POKEMON', payload: data }));
-  }, []);
+
+  const { data: pokemon } = useQuery<PokemonType[]>([], {
+    queryFn: () => fetch('./pokemon.json').then((res) => res.json()),
+  });
 
   const setSearch = useCallback((s: string) => {
     dispatch({ type: 'SET_SEARCH', payload: s });
@@ -62,7 +52,7 @@ export const usePokemonSource = () => {
 
   const filteredPokemon = useMemo(
     () =>
-      pokemon
+      (pokemon || [])
         .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
         .slice(0, 21),
     [search, pokemon],
