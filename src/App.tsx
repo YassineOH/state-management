@@ -1,4 +1,6 @@
-import { useSnapshot } from 'valtio';
+import { Suspense } from 'react';
+import { useAtom, useAtomValue } from 'jotai';
+
 import { Input } from './components/ui/input';
 import {
   Card,
@@ -6,33 +8,31 @@ import {
   CardFooter,
   CardHeader,
 } from './components/ui/card';
-
-import { pokemon, search } from './stores/valtioStore';
+import { pokemonAtom, searchAtom } from './stores/jotaiStore';
 
 function SearchBox() {
-  const snap = useSnapshot(search);
+  const [search, setSearch] = useAtom(searchAtom);
   return (
     <Input
       type="text"
       className="text-lg"
       placeholder="Search..."
-      value={snap.query}
-      onChange={(e) => (search.query = e.target.value)}
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
     />
   );
 }
 
 function PokemonList() {
-  const snap = useSnapshot(pokemon);
+  const pokemon = useAtomValue(pokemonAtom);
 
   return (
     <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {snap.list.map((p) => (
+      {pokemon.map((p) => (
         <Card key={p.id} className="p-4">
           <CardHeader>
             <h3 className="text-center text-lg font-semibold">{p.name}</h3>
           </CardHeader>
-
           <CardContent>
             <img
               className="mx-auto h-32 w-32 flex-shrink-0 rounded-full bg-transparent"
@@ -59,7 +59,9 @@ function App() {
 
       <div className="w-full space-y-6">
         <SearchBox />
-        <PokemonList />
+        <Suspense fallback={'loading'}>
+          <PokemonList />
+        </Suspense>
       </div>
     </main>
   );
