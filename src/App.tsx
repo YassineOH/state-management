@@ -1,3 +1,4 @@
+import { useSnapshot } from 'valtio';
 import { Input } from './components/ui/input';
 import {
   Card,
@@ -5,32 +6,33 @@ import {
   CardFooter,
   CardHeader,
 } from './components/ui/card';
-import { usePokemon } from './stores/zustandStore';
+
+import { pokemon, search } from './stores/valtioStore';
 
 function SearchBox() {
-  const search = usePokemon((s) => s.search);
-  const setSearch = usePokemon((s) => s.setSearch)!;
+  const snap = useSnapshot(search);
   return (
     <Input
       type="text"
       className="text-lg"
       placeholder="Search..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
+      value={snap.query}
+      onChange={(e) => (search.query = e.target.value)}
     />
   );
 }
 
 function PokemonList() {
-  const pokemon = usePokemon((s) => s.pokemon);
+  const snap = useSnapshot(pokemon);
 
   return (
     <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {pokemon.map((p) => (
+      {snap.list.map((p) => (
         <Card key={p.id} className="p-4">
           <CardHeader>
             <h3 className="text-center text-lg font-semibold">{p.name}</h3>
           </CardHeader>
+
           <CardContent>
             <img
               className="mx-auto h-32 w-32 flex-shrink-0 rounded-full bg-transparent"
@@ -38,6 +40,7 @@ function PokemonList() {
               alt=""
             />
           </CardContent>
+
           <CardFooter>
             <p className="w-full text-center">- {p.type} -</p>
           </CardFooter>
@@ -53,6 +56,7 @@ function App() {
       <h1 className="my-6 text-center text-4xl font-extrabold capitalize">
         state management libraries
       </h1>
+
       <div className="w-full space-y-6">
         <SearchBox />
         <PokemonList />
